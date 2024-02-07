@@ -34,11 +34,8 @@ test("Should not create a passenger account if name is invalid", async () => {
         isPassenger: true,
         password: "123456"
     }
-    // when
-    const outputSignup = await signup(inputSignup);
-    
-    // then
-    expect(outputSignup).toBe(-3);
+    // when/then
+    await expect(signup(inputSignup)).rejects.toThrow(new Error("Invalid name"));
 });
 
 test("Should not create a passenger account if email is invalid", async () => {
@@ -50,11 +47,8 @@ test("Should not create a passenger account if email is invalid", async () => {
         isPassenger: true,
         password: "123456"
     }
-    // when
-    const outputSignup = await signup(inputSignup);
-    
-    // then
-    expect(outputSignup).toBe(-2);
+    // when/then
+    await expect(signup(inputSignup)).rejects.toThrow(new Error("Invalid email"));
 });
 
 test.each([
@@ -75,11 +69,8 @@ test.each([
         isPassenger: true,
         password: "123456"
     }
-    // when
-    const outputSignup = await signup(inputSignup);
-    
-    // then
-    expect(outputSignup).toBe(-1);
+    // when/then
+    await expect(signup(inputSignup)).rejects.toThrow(new Error("Invalid CPF"));
 });
 
 test("Should not create a passenger account if email is duplicated", async () => {
@@ -93,13 +84,10 @@ test("Should not create a passenger account if email is duplicated", async () =>
     }
     // when
     const {accountId} = await signup(inputSignup);
-    const outputSignup = await signup(inputSignup);
+    await expect(signup(inputSignup)).rejects.toThrow(new Error("Account already exists"));
 
     // cleanup
     await deleteAccount(accountId);
-    
-    // then
-    expect(outputSignup).toBe(-4);
 });
 
 test("Should create a driver account", async () => {
@@ -136,9 +124,6 @@ test("Should not create a driver account if plate is invalid", async () => {
         isDriver: true,
         password: "123456"
     }
-    // when
-    const outputSignup = await signup(inputSignup);
-
-    // then
-    expect(outputSignup).toBe(-5);
+    // when/then
+    await expect(signup(inputSignup)).rejects.toThrow(new Error("Invalid car plate"));
 });
