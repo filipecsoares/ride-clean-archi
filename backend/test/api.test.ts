@@ -4,7 +4,7 @@ axios.defaults.validateStatus = function () {
 	return true;
 }
 
-test("Should create an account passenger", async function () {
+test("Deve criar uma conta para o passageiro pela API", async function () {
 	// given
 	const inputSignup = {
 		name: "John Doe",
@@ -24,7 +24,7 @@ test("Should create an account passenger", async function () {
 	expect(outputGetAccount.email).toBe(inputSignup.email);
 });
 
-test("Should not create a passenger account if name is invalid", async function () {
+test("Não deve criar uma conta se o nome for inválido", async function () {
 	// given
 	const inputSignup = {
 		name: "John",
@@ -40,7 +40,7 @@ test("Should not create a passenger account if name is invalid", async function 
 	expect(outputSignup.message).toBe("Invalid name");
 });
 
-test("Should create an account driver", async function () {
+test("Deve criar uma conta para o motorista", async function () {
 	// given
 	const inputSignup = {
 		name: "John Doe",
@@ -62,7 +62,7 @@ test("Should create an account driver", async function () {
 	expect(outputGetAccount.email).toBe(inputSignup.email);
 });
 
-test("Should not create a driver account if plate is invalid", async function () {
+test("Não deve criar uma conta para o motorista com a placa inválida", async function () {
 	// given
 	const inputSignup = {
 		name: "John Doe",
