@@ -1,17 +1,16 @@
 import AcceptRide from "../src/application/usecase/AcceptRide";
-import AccountDAODatabase from "../src/infra/repository/AccountRepositoryDatabase";
+import AccountRepositoryDatabase from "../src/infra/repository/AccountRepositoryDatabase";
 import DatabaseConnection from "../src/infra/database/DatabaseConnection";
-import GetAccount from "../src/application/usecase/GetAccount";
 import GetRide from "../src/application/usecase/GetRide";
 import LoggerConsole from "../src/infra/logger/LoggerConsole";
 import PgPromiseAdapter from "../src/infra/database/PgPromiseAdapter";
 import RequestRide from "../src/application/usecase/RequestRide";
-import RideDAODatabase from "../src/infra/repository/RideRepositoryDatabase";
+import RideRepositoryDatabase from "../src/infra/repository/RideRepositoryDatabase";
 import Signup from "../src/application/usecase/Signup";
+import PositionRepositoryDatabase from "../src/infra/repository/PositionRepositoryDatabase";
 
 
 let signup: Signup;
-let getAccount: GetAccount;
 let requestRide: RequestRide;
 let getRide: GetRide;
 let acceptRide: AcceptRide;
@@ -19,17 +18,17 @@ let databaseConnection: DatabaseConnection;
 
 beforeEach(() => {
 	databaseConnection = new PgPromiseAdapter();
-	const accountDAO = new AccountDAODatabase(databaseConnection);
-	const rideDAO = new RideDAODatabase();
+	const accountRepository = new AccountRepositoryDatabase(databaseConnection);
+	const rideRepository = new RideRepositoryDatabase(databaseConnection);
+	const positionRepository = new PositionRepositoryDatabase(databaseConnection);
 	const logger = new LoggerConsole();
-	signup = new Signup(accountDAO, logger);
-	getAccount = new GetAccount(accountDAO);
-	requestRide = new RequestRide(rideDAO, accountDAO, logger);
-	getRide = new GetRide(rideDAO, logger);
-	acceptRide = new AcceptRide(rideDAO, accountDAO);
+	signup = new Signup(accountRepository, logger);
+	requestRide = new RequestRide(rideRepository, accountRepository, logger);
+	getRide = new GetRide(rideRepository, positionRepository, logger);
+	acceptRide = new AcceptRide(rideRepository, accountRepository);
 })
 
-test("Deve aceitar uma corrida", async function () {
+test("Should accept a ride.", async function () {
 	const inputSignupPassenger = {
 		name: "John Doe",
 		email: `john.doe${Math.random()}@gmail.com`,
@@ -65,7 +64,7 @@ test("Deve aceitar uma corrida", async function () {
 	expect(outputGetRide.driverId).toBe(outputSignupDriver.accountId);
 });
 
-test("Não pode aceitar uma corrida se a conta não for de um motorista", async function () {
+test("Should not accept a ride if the account is not a driver.", async function () {
 	const inputSignupPassenger = {
 		name: "John Doe",
 		email: `john.doe${Math.random()}@gmail.com`,

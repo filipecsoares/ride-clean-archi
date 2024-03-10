@@ -11,4 +11,5 @@ export default class StartRide {
 		ride.start();
 		await this.rideRepository.update(ride);
 	}
+
 }

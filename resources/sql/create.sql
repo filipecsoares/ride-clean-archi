@@ -23,5 +23,23 @@ create table ridedb.ride (
 	from_long numeric,
 	to_lat numeric,
 	to_long numeric,
+	last_lat numeric,
+	last_long numeric,
 	date timestamp
+);
+
+create table ridedb.position (
+	position_id uuid primary key,
+	ride_id uuid,
+	lat numeric,
+	long numeric,
+	date timestamp
+);
+
+create table ridedb.transaction (
+	transaction_id uuid primary key,
+	ride_id uuid,
+	amount numeric,
+	date timestamp,
+	status text
 );

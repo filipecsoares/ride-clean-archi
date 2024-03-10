@@ -21,6 +21,7 @@ export default class RequestRide {
 			rideId: ride.rideId
 		};
 	}
+
 }
 
 type Input = {
