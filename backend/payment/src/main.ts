@@ -1,5 +1,4 @@
 import ExpressAdapter from "./infra/http/ExpressAdapter";
-import LoggerConsole from "./infra/logger/LoggerConsole";
 import MainController from "./infra/controller/MainController";
 import PgPromiseAdapter from "./infra/database/PgPromiseAdapter";
 import Registry from "./infra/di/Registry";
@@ -14,9 +13,6 @@ import GetTransactionByRideId from "./application/usecase/GetTransactionByRideId
 const httpServer = new ExpressAdapter();
 const databaseConnection = new PgPromiseAdapter();
 const transactionRepository = new TransactionRepositoryORM(databaseConnection);
-
-// interface adapter
-const logger = new LoggerConsole();
 
 // use case
 const processPayment = new ProcessPayment(transactionRepository);
