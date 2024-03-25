@@ -1,34 +1,30 @@
-import AccountRepositoryDatabase from "../src/infra/repository/AccountRepositoryDatabase";
 import DatabaseConnection from "../src/infra/database/DatabaseConnection";
-import GetAccount from "../src/application/usecase/GetAccount";
 import GetRide from "../src/application/usecase/GetRide";
 import LoggerConsole from "../src/infra/logger/LoggerConsole";
 import PgPromiseAdapter from "../src/infra/database/PgPromiseAdapter";
 import RequestRide from "../src/application/usecase/RequestRide";
 import RideRepositoryDatabase from "../src/infra/repository/RideRepositoryDatabase";
-import Signup from "../src/application/usecase/Signup";
 import PositionRepositoryDatabase from "../src/infra/repository/PositionRepositoryDatabase";
+import AccountGateway from "../src/application/gateway/AccountGateway";
+import AccountGatewayHttp from "../src/infra/gateway/AccountGatewayHttp";
 
 
-let signup: Signup;
-let getAccount: GetAccount;
 let requestRide: RequestRide;
 let getRide: GetRide;
 let databaseConnection: DatabaseConnection;
+let accountGateway: AccountGateway;
 
 beforeEach(() => {
 	databaseConnection = new PgPromiseAdapter();
-	const accountRepository = new AccountRepositoryDatabase(databaseConnection);
 	const rideRepository = new RideRepositoryDatabase(databaseConnection);
 	const positionRepository = new PositionRepositoryDatabase(databaseConnection);
 	const logger = new LoggerConsole();
-	signup = new Signup(accountRepository, logger);
-	getAccount = new GetAccount(accountRepository);
-	requestRide = new RequestRide(rideRepository, accountRepository, logger);
+	accountGateway = new AccountGatewayHttp();
+	requestRide = new RequestRide(rideRepository, accountGateway, logger);
 	getRide = new GetRide(rideRepository, positionRepository, logger);
 })
 
-test("Should request a ride.", async function () {
+test("Should request ride.", async function () {
 	const inputSignup = {
 		name: "John Doe",
 		email: `john.doe${Math.random()}@gmail.com`,
@@ -36,7 +32,7 @@ test("Should request a ride.", async function () {
 		isPassenger: true,
 		password: "123456"
 	};
-	const outputSignup = await signup.execute(inputSignup);
+	const outputSignup = await accountGateway.signup(inputSignup);
 	const inputRequestRide = {
 		passengerId: outputSignup.accountId,
 		fromLat: -27.584905257808835,
@@ -50,7 +46,7 @@ test("Should request a ride.", async function () {
 	expect(outputGetRide.status).toBe("requested");
 });
 
-test("Should not request a ride if account does not exist.", async function () {
+test("Should not request ride if account not found.", async function () {
 	const inputRequestRide = {
 		passengerId: "5fd82c60-ff7c-40d0-9bb8-f56d6836f1aa",
 		fromLat: -27.584905257808835,
@@ -58,10 +54,10 @@ test("Should not request a ride if account does not exist.", async function () {
 		toLat: -27.496887588317275,
 		toLong: -48.522234807851476
 	};
-	await expect(() => requestRide.execute(inputRequestRide)).rejects.toThrow(new Error("Account does not exist"));
+	await expect(() => requestRide.execute(inputRequestRide)).rejects.toThrow(new Error("Account not found"));
 });
 
-test("Should not request a ride if account is not from a passenger.", async function () {
+test("Should not request ride if account is not a passenger.", async function () {
 	const inputSignup = {
 		name: "John Doe",
 		email: `john.doe${Math.random()}@gmail.com`,
@@ -71,7 +67,7 @@ test("Should not request a ride if account is not from a passenger.", async func
 		isDriver: true,
 		password: "123456"
 	};
-	const outputSignup = await signup.execute(inputSignup);
+	const outputSignup = await accountGateway.signup(inputSignup);
 	const inputRequestRide = {
 		passengerId: outputSignup.accountId,
 		fromLat: -27.584905257808835,
@@ -82,7 +78,7 @@ test("Should not request a ride if account is not from a passenger.", async func
 	await expect(() => requestRide.execute(inputRequestRide)).rejects.toThrow(new Error("Only passengers can request a ride"));
 });
 
-test("Should not request a ride if passenger has an active ride.", async function () {
+test("Should not request ride if a ride is already active.", async function () {
 	const inputSignup = {
 		name: "John Doe",
 		email: `john.doe${Math.random()}@gmail.com`,
@@ -90,7 +86,7 @@ test("Should not request a ride if passenger has an active ride.", async functio
 		isPassenger: true,
 		password: "123456"
 	};
-	const outputSignup = await signup.execute(inputSignup);
+	const outputSignup = await accountGateway.signup(inputSignup);
 	const inputRequestRide = {
 		passengerId: outputSignup.accountId,
 		fromLat: -27.584905257808835,

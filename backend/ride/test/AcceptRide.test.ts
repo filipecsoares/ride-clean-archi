@@ -1,34 +1,33 @@
 import AcceptRide from "../src/application/usecase/AcceptRide";
-import AccountRepositoryDatabase from "../src/infra/repository/AccountRepositoryDatabase";
 import DatabaseConnection from "../src/infra/database/DatabaseConnection";
 import GetRide from "../src/application/usecase/GetRide";
 import LoggerConsole from "../src/infra/logger/LoggerConsole";
 import PgPromiseAdapter from "../src/infra/database/PgPromiseAdapter";
 import RequestRide from "../src/application/usecase/RequestRide";
 import RideRepositoryDatabase from "../src/infra/repository/RideRepositoryDatabase";
-import Signup from "../src/application/usecase/Signup";
 import PositionRepositoryDatabase from "../src/infra/repository/PositionRepositoryDatabase";
+import AccountGateway from "../src/application/gateway/AccountGateway";
+import AccountGatewayHttp from "../src/infra/gateway/AccountGatewayHttp";
 
 
-let signup: Signup;
 let requestRide: RequestRide;
 let getRide: GetRide;
 let acceptRide: AcceptRide;
 let databaseConnection: DatabaseConnection;
+let accountGateway: AccountGateway;
 
 beforeEach(() => {
 	databaseConnection = new PgPromiseAdapter();
-	const accountRepository = new AccountRepositoryDatabase(databaseConnection);
 	const rideRepository = new RideRepositoryDatabase(databaseConnection);
 	const positionRepository = new PositionRepositoryDatabase(databaseConnection);
 	const logger = new LoggerConsole();
-	signup = new Signup(accountRepository, logger);
-	requestRide = new RequestRide(rideRepository, accountRepository, logger);
+	accountGateway = new AccountGatewayHttp();
+	requestRide = new RequestRide(rideRepository, accountGateway, logger);
 	getRide = new GetRide(rideRepository, positionRepository, logger);
-	acceptRide = new AcceptRide(rideRepository, accountRepository);
+	acceptRide = new AcceptRide(rideRepository, accountGateway);
 })
 
-test("Should accept a ride.", async function () {
+test("Should accept ride.", async function () {
 	const inputSignupPassenger = {
 		name: "John Doe",
 		email: `john.doe${Math.random()}@gmail.com`,
@@ -36,7 +35,7 @@ test("Should accept a ride.", async function () {
 		isPassenger: true,
 		password: "123456"
 	};
-	const outputSignupPassenger = await signup.execute(inputSignupPassenger);
+	const outputSignupPassenger = await accountGateway.signup(inputSignupPassenger);
 	const inputRequestRide = {
 		passengerId: outputSignupPassenger.accountId,
 		fromLat: -27.584905257808835,
@@ -53,7 +52,7 @@ test("Should accept a ride.", async function () {
 		isDriver: true,
 		password: "123456"
 	};
-	const outputSignupDriver = await signup.execute(inputSignupDriver);
+	const outputSignupDriver = await accountGateway.signup(inputSignupDriver);
 	const inputAcceptRide = {
 		rideId: outputRequestRide.rideId,
 		driverId: outputSignupDriver.accountId
@@ -72,7 +71,7 @@ test("Should not accept a ride if the account is not a driver.", async function 
 		isPassenger: true,
 		password: "123456"
 	};
-	const outputSignupPassenger = await signup.execute(inputSignupPassenger);
+	const outputSignupPassenger = await accountGateway.signup(inputSignupPassenger);
 	const inputRequestRide = {
 		passengerId: outputSignupPassenger.accountId,
 		fromLat: -27.584905257808835,
@@ -88,7 +87,7 @@ test("Should not accept a ride if the account is not a driver.", async function 
 		isPassenger: true,
 		password: "123456"
 	};
-	const outputSignupDriver = await signup.execute(inputSignupDriver);
+	const outputSignupDriver = await accountGateway.signup(inputSignupDriver);
 	const inputAcceptRide = {
 		rideId: outputRequestRide.rideId,
 		driverId: outputSignupDriver.accountId
