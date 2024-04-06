@@ -22,7 +22,5 @@ export default class MainController {
 		this.httpServer?.register("post", "/request_ride_async", async (params: any, body: any) => {
 			await this.queue?.publish("requestRide", body);
 		});
-
 	}
-
 }

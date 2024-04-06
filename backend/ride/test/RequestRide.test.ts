@@ -7,6 +7,7 @@ import RideRepositoryDatabase from "../src/infra/repository/RideRepositoryDataba
 import PositionRepositoryDatabase from "../src/infra/repository/PositionRepositoryDatabase";
 import AccountGateway from "../src/application/gateway/AccountGateway";
 import AccountGatewayHttp from "../src/infra/gateway/AccountGatewayHttp";
+import FetchAdapter from "../src/infra/http/FetchAdapter";
 
 
 let requestRide: RequestRide;
@@ -19,7 +20,9 @@ beforeEach(() => {
 	const rideRepository = new RideRepositoryDatabase(databaseConnection);
 	const positionRepository = new PositionRepositoryDatabase(databaseConnection);
 	const logger = new LoggerConsole();
-	accountGateway = new AccountGatewayHttp();
+	// const httpClient = new AxiosAdapter();
+	const httpClient = new FetchAdapter();
+	accountGateway = new AccountGatewayHttp(httpClient);
 	requestRide = new RequestRide(rideRepository, accountGateway, logger);
 	getRide = new GetRide(rideRepository, positionRepository, logger);
 })
