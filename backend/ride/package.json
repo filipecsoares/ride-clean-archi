@@ -16,6 +16,8 @@
     "@types/amqplib": "^0.10.5",
     "@types/jest": "^29.5.12",
     "@types/node-fetch": "^2.6.9",
+    "@types/cors": "^2.8.17",
+    "cors": "^2.8.5",
     "node-fetch": "2",
     "amqplib": "^0.10.3",
     "axios": "^1.6.7",
